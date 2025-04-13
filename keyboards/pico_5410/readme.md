@@ -79,7 +79,7 @@ Enter the bootloader in 3 ways:
     and the reading? Not sure yet.
     
     Since the matrix supports 19 KSO (output) pins, and 8 KSI (input) pins (total 27)
-    and the keyboard has 26 pins unaccounted for (plus 3 blanks - one of which must be a not present LED)
+    and the keyboard has ~26 pins unaccounted for (plus 3 blanks - one of which must be a not present LED)
     this suggests that the keyboard matrix is used. Certainly the KSI pins go somewhere.
     
     MUTE_LED, GND, and CAPS_LED are pins 32 to 30
@@ -87,9 +87,37 @@ Enter the bootloader in 3 ways:
     Oddly pin 1 goes to GPIO10, and has a 10k pullup.
         Not sure what this means but it's an odd one out.
         Maybe some custom kbd scan is needed.
+        Let's ignore it for now.
+           
+    It's 10khz to 400khz i2c.
+        What is QMK??
         
+    Keyboard scan - from ECE1117
+        It could invert KSO[22:0]. But probably doesn't.
+        I should write 0<<6 (KSEN=0) to 0x40 (KSO select)
+            as that enables keyboard scan.
+            
+        Looks like pullups may need to be controlled by a gpio matrix...
+        maybe just keyboard scan will just owrk.
+        Note that KSO19/GPIO00 may have weirdness.
+            Especially bit 6 which is kso/gpio mode for KS019 and GPIO0  - normal... but:
+            GPIO00_config bit 7 which has inverted logic
+                0 default has pullup en!
+                1 = pullup disabled
+                but controls all KSI[7:0] pins!
+                in GPIO00 0x0A
+                
+        Note that GPIO01_config at 0x0B should keep bit 7 cleared to 0. I would anyway, but perhaps it's bad?
     
-    Keyboard 
+    OK, partially works
+    some keys work normally
+    some keys trigger every row to be low for that column
+    (19 rows for KSO) 8 columns for KSI
+    . How? I guess that's a dedicated column for them??
+    x\sawq are all multirowers somehow... maybe they float lowish
+    
+    I think some of the defaults are to not be KSO pins
+    I think pin KSI0 is weird and has a separate pullup
     
 ### I2C
     

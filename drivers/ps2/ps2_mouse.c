@@ -210,6 +210,13 @@ static inline void ps2_mouse_convert_report_to_hid(report_mouse_t *mouse_report)
     mouse_report->y = -mouse_report->y;
 #endif
 
+#ifdef PS2_MOUSE_INVERT_H_DIRECT
+    mouse_report->h = -mouse_report->h;
+#endif
+#ifdef PS2_MOUSE_INVERT_V_DIRECT
+    mouse_report->v = -mouse_report->v;
+#endif
+
 #ifdef PS2_MOUSE_ROTATE
     mouse_xy_report_t x = mouse_report->x;
     mouse_xy_report_t y = mouse_report->y;

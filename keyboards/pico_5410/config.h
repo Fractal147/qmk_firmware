@@ -22,3 +22,5 @@
 
 #define MATRIX_ROWS 20
 #define MATRIX_COLS 8
+
+#define MATRIX_HAS_GHOST

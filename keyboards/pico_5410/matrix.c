@@ -65,6 +65,40 @@ void matrix_init_custom(void) {
     printf("i2c: setup xFA set to 0x03: err = %i \n", (int8_t) err);
 
 
+    //Setup GPIO10 as open drain outputs with pullup
+    // buf[0] = 0b00110001;
+    // err |= i2c_write_register(ECE_ADDR, 0x12, buf,sizeof(buf), ECE_TIMEOUT);
+    // //and write 1 to set it up as high /pulled up by external
+    // buf[0] = 0x01;
+    // err |= i2c_write_register(ECE_ADDR, 0x06, buf,sizeof(buf), ECE_TIMEOUT);
+
+
+    //Setup GPIO00
+    //Output open drain with pullup, mux=1
+    buf[0] = 0b01110001;
+    err |= i2c_write_register(ECE_ADDR, 0x0A, buf,sizeof(buf), ECE_TIMEOUT);
+
+    //setup GPUI01
+    //Output open drain with pullup, mux =1
+    buf[0] = 0b01110001;
+    err |= i2c_write_register(ECE_ADDR, 0x0B, buf,sizeof(buf), ECE_TIMEOUT);
+    //and write 1 to both to set it up as high /pulled up by external
+    buf[0] = 0x03;
+    err |= i2c_write_register(ECE_ADDR, 0x05, buf,sizeof(buf), ECE_TIMEOUT);
+
+
+    //Setup GPIO23
+    //Output open drain with pullup, mux=1
+    buf[0] = 0b01110001;
+    err |= i2c_write_register(ECE_ADDR, 0x1D, buf,sizeof(buf), ECE_TIMEOUT);
+    //and write 1 to set it up as high /pulled up by external
+    buf[0] = 0x01;
+    err |= i2c_write_register(ECE_ADDR, 0x07, buf,sizeof(buf), ECE_TIMEOUT);
+
+    //(could setup GPIO21/22 but they are disconnected)
+
+
+
 
     print("kbd_matrix_init: pre flash\n");
     gpio_set_pin_output(GP25);
@@ -130,15 +164,18 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
     //It could...leave the ECE117 with all KSOs assered low
     //Then check the KSI status to see if it's recieved a toggle.
     //or it could just scan all KSOs 1 by 1.
+    //A matrix row is just an integer, so feed it bits.
+    //1 means pressed, 0 means unpressed.
+
     matrix_row_t new_matrix[MATRIX_ROWS]={0};
 
     //note implicit pin 1 has some pressed keys unless it's written off...
-    uint8_t row =0;
+    uint8_t row =0; //this linearly ticks up.
     for(uint8_t kso=0x00; kso<=0x16; kso++)
     {
         if(kso ==0x07) { kso =0x0b;} //there's a gap in the address table
 
-        buf[0] = (0<<6) || kso; //KSEN=0(active), drive select KSO low.
+        buf[0] = (0<<6) | kso; //KSEN=0(active), drive select KSO low.
         err |= i2c_write_register(ECE_ADDR, 0x40, buf,sizeof(buf), ECE_TIMEOUT);
 
         wait_us(50); //maybe not needed
@@ -148,14 +185,42 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
 
         if (err == I2C_STATUS_SUCCESS){
             new_matrix[row] = ~buf[0]; //since pin goes low (0) when pressed
+            //Read GPIO10 ....
+            // err |= i2c_read_register(ECE_ADDR, 0x01, buf,sizeof(buf), ECE_TIMEOUT);
+            // new_matrix[row] |= (((~buf[0])&0x01)<<8);
+
         } else {
             //i2c error, skip silently
             new_matrix[row] = current_matrix[row];
         }
         row++;
     }
+
+    //Disable all KSOs:
     buf[0] = (1<<6); //KSEN=1(disabled all KSO)
     i2c_write_register(ECE_ADDR, 0x40, buf,sizeof(buf), ECE_TIMEOUT);
+
+    //For GPIO10/Row20 - set it to low
+/*
+    err |= i2c_read_register(ECE_ADDR, 0x06, buf,sizeof(buf), ECE_TIMEOUT);
+    buf[0] = buf[0] & (~0x01); //set first bit to 0
+    err |= i2c_write_register(ECE_ADDR, 0x06, buf,sizeof(buf), ECE_TIMEOUT);
+
+    wait_us(50); //maybe not needed
+
+    //read KSI input register
+    err |= i2c_read_register(ECE_ADDR, 0x41, buf,sizeof(buf), ECE_TIMEOUT);
+
+    if (err == I2C_STATUS_SUCCESS){
+        new_matrix[row] = ~buf[0]; //since pin goes low (0) when pressed
+    } else {
+        //i2c error, skip silently
+        new_matrix[row] = current_matrix[row];
+    }
+    //set first bit to 1 again. (open drain, inactive)
+    buf[0] = buf[0] | (0x01); //set first bit to 0
+    err |= i2c_write_register(ECE_ADDR, 0x06, buf,sizeof(buf), ECE_TIMEOUT);*/
+
 
     //here's where gpio 10 would be.
 

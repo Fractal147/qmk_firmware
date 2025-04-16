@@ -22,9 +22,10 @@ See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_to
 
 Enter the bootloader in 3 ways:
 
-* **Bootmagic reset**: Hold down the key at (0,0) in the matrix (usually the top left key or Escape) and plug in the keyboard
-* **Physical reset button**: Briefly press the button on the back of the PCB - some may have pads you must short instead
-* **Keycode in layout**: Press the key mapped to `QK_BOOT` if it is available
+* **Bootmagic reset**: Hold down the (f4/mute key) and plug in the keyboard
+* possible this is f4/mute + b, there's more magic available
+* **Physical reset button**: Hold on-pcb BOOT button while plugging in 
+* **Keycode in layout**: Press the key mapped to `QK_BOOT` (fn-shift-f9)
 
 
 ## Wiring
@@ -49,6 +50,7 @@ Enter the bootloader in 3 ways:
         
     Backlight?
         Needs 5v on pin 5...
+        Wired to VBUS (5v)
 
 ## WORKING:
     Trackpad
@@ -58,18 +60,40 @@ Enter the bootloader in 3 ways:
     Touchpoint L and R click
     Touchpoint scroll button
     Adjust touchpoint scroll sensitivity (set to /20)
+    All physical keys
+    fn key
+    bootloader entry (hold f4 and b when plugging in)
     
 ## TODO:
+
     /ideally/ spin touchpoint out to a separate device so the OS could decide sensitivity
         Though this is probably hard.
+        
     touchpad horizontal scroll?
         it's triggering in hardware, but I think message is being ignored somehow.
         Note it's not just sending a horizontal scroll message all the time..
             assuming that makey breaky
-    All of keyboard...
-        What's pin 1 for?
-        
+            
+    Pin 0 of keyboard mystery
+    
     Backlight.
+    
+    Caps lock LED
+    Mute mic key
+    Mute key LED
+    
+    ECE I2C errors recovery (send reset, re-init)
+    
+    Touchpad errors detection and recovery - hmm maybe power it from a pico IO pin?
+    
+    Sleep modes?
+    
+    Interrupts based on any key press - use ECE sending ALL for instance.
+    
+    TOUCHPOINT DISABLING.
+        e.g. use that mute key
+        
+    
     
 ### Keyboard notes
     It's an ECE1117 io controller running the keyboard

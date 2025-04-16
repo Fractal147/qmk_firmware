@@ -50,9 +50,9 @@ void matrix_init_custom(void) {
 
     //enable keyboard scan- write 0x00 to 0x40
     //uint8_t counter =0;
-    for(uint8_t counter =0; counter <20 ;counter++){
+    for(uint8_t counter =0; counter <8 ;counter++){
         printf("kbd_matrix_init: counter %u\n", counter);
-        wait_ms(100); // wait for powering up
+        wait_ms(100); // wait for powering up seems to be about 700 ms typically total
     }
 
     i2c_init();
@@ -103,7 +103,7 @@ void matrix_init_custom(void) {
     print("kbd_matrix_init: pre flash\n");
     gpio_set_pin_output(GP25);
     gpio_write_pin_high(GP25);
-    wait_ms(100); // wait for powering up
+    wait_ms(100); // wait for powering up -
     print("kbd_matrix_init: post flash\n");
     gpio_set_pin_input(GP25);
 

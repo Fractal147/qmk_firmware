@@ -24,3 +24,6 @@
 #define MATRIX_COLS 8
 
 #define MATRIX_HAS_GHOST
+
+#define BOOTMAGIC_ROW 2
+#define BOOTMAGIC_COLUMN 0
